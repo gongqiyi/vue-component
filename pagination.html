@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+
+
+
+    <json-input v-model="json"></json-input>
+
+
+    <file-select v-model="files" @input="fileSelected" multiple></file-select>
+
+
+    <date-select v-model="date"></date-select>
+    <date-select :value="date" @input="date = xxx"></date-select>
+
+
+
+    <!-- <input type="text" v-model="abc"> -->
+
+    <child :prop="msg"></child>
+    <!-- <pre>
+      {{msg | json}}
+    </pre> -->
+    <ul>
+      <li v-for="num in showingList">{{num}}</li>
+    </ul>
+    <pagination :total="15" @change="changed"></pagination>
+  </div>
+</body>
+<script src="vue.js"></script>
+<script type="text/x-template" id="pagination-tpl">
+  <div>
+    <button :disabled="currPage == 1" @click="prev">&lt;&lt;</button>
+    <ul>
+      <li
+        @click="currPage = index"
+        v-for="index in total"
+        :style="{color:currPage==index ? 'red':'black'}"
+      >{{index}}</li>
+    </ul>
+    <button :disabled="currPage == total" @click="next">>></button>
+    <input type="text" v-model.number="userInputPage" />
+    <button @click="go">Go</button>
+  </div>
+</script>
+
+<script>
+  Vue.component('pagination', {
+    template: '#pagination-tpl',
+    props: {
+      total: {
+        type: Number,
+        required: true,
+      }
+    },
+    data() {
+      return {
+        currPage: 1,
+        userInputPage: 0,
+      }
+    },
+    watch: {
+      currPage(newVal, oldVal){
+        this.$emit('change', newVal, oldVal)
+      }
+    },
+    methods: {
+      prev() {
+        this.currPage--
+        if(this.currPage < 1) {
+          this.currPage = 1
+        }
+      },
+      next() {
+        this.currPage++
+        if(this.currPage > this.total) {
+          this.currPage = this.total
+        }
+      },
+      go(){
+
+        if (this.userInputPage > this.total) {
+          this.currPage = this.total
+        } else if (this.userInputPage < 1) {
+          this.currPage = 1
+        } else {
+          this.currPage = this.userInputPage  
+        }
+      }
+    }
+  })
+
+  Vue.component('child', {
+    template: `
+      <div>
+        <style scoped>
+          
+        </style>
+        <p@click="prop.a++">{{prop.a}}</p>
+      </div>
+    `,
+    props: ['prop'],
+    data() {
+      return {
+
+      }
+    },
+    watch: {
+      prop() {
+        console.log('prop changed')
+      },
+      start() {
+      }
+    }
+  })
+
+  Vue.component('json-input', {
+    template: `
+      <div>
+        <textarea @keyup="edit">{{jsonText}}</textarea>
+      </div>
+    `,
+    props: ['value'],
+    data() {
+      return {
+        jsonText: JSON.stringify(this.value, null, 2)
+      }
+    },
+    watch: {
+      value(newVal) {
+        this.jsonText = JSON.stringify(newVal, null, 2)
+      }
+    },
+    methods: {
+      edit(event) {
+        var inputText = event.target.value
+
+        try {
+          var inputObject = JSON.parse(inputText)
+          this.$emit('input', inputObject)
+        } catch(e) {
+
+        }
+      }
+    }
+  })
+
+  Vue.component('file-select', {
+    template: `
+      <div>
+        <input :multiple="multiple" type="file" @change="changed" />
+      </div>
+    `,
+    props: ['multiple'],
+    methods: {
+      changed(event) {
+        var file
+        if (event.target.files.length > 1) {
+          file = event.target.files
+          this.$emit('input', Array.from(file))
+        } else if (event.target.files.length == 1) {
+          file = event.target.files[0]
+          this.$emit('input', file)
+        } else {
+
+        }
+      }
+    }
+  })
+
+  Vue.component('date-select', {
+    template: `
+      <input :value="value.toISOString().substr(0,10)" ref="dateInput" type="date" @change="changed" />
+    `,
+    props: ['value'],
+    methods: {
+      changed() {
+        var dateText = this.$refs.dateInput.value
+
+        console.log(dateText)
+
+        this.$emit('input', new Date(dateText))
+      }
+    }
+    // data() {
+    //   return {
+
+    //   }
+    // },
+    // watch: {
+    //   value(date) {
+    //     console.log('value changed')
+    //     var dateText = date.toISOString().substr(0, 10)
+    //     this.$refs.dateInput.value = dateText
+    //   }
+    // },
+  })
+  vm = new Vue({
+    el: '#app',
+    data: {
+      list: Array(100).fill(0).map((it,index) => index),
+      page: 1,
+      msg: {
+        a: 8
+      },
+
+      date: new Date('2017-02-11'),
+
+      file: '',
+
+      files: '',
+
+      json: {
+        a: 1,
+        b: [1,2,3],
+        c: {
+          foo: 'bar'
+        }
+      }
+
+    },
+    computed: {
+      showingList(){
+        return this.list.slice(this.page * 10 , this.page * 10 + 10)
+      }
+    },
+    methods: {
+      changed(newPageNum, oldPageNum){
+        this.page = newPageNum
+        // console.log(newPageNum, oldPageNum)
+      },
+      fileSelected(file) {
+        console.log(file)
+      }
+    }
+  })
+</script>
+</html>

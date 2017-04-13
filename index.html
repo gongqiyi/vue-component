@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vue Components</title>
+</head>
+<body>
+  <div id="app">
+<!--     <table>
+      <tbody>
+        <tr>
+          <td is="table-cell"></td>
+          <td is="table-cell"></td>
+          <td is="table-cell"></td>
+          <td is="table-cell"></td>
+        </tr>
+      </tbody>
+    </table> -->
+
+
+    <p>below is a component</p>
+
+    <counter :start="55" v-on:inc="a" v-on:dec="b"></counter>
+  
+    <form action="">
+      <select2 :options="[1,2,3,4,5]"></select2>
+    </form>
+
+    <code-mirror @change="callback" mode="javascript" theme="xxx">
+      function a() {
+
+      }
+    </code-mirror>
+
+    <!-- <product @like="productClicked" v-for="product in productList" :name="product.name" :price="product.price" :image-src="product.image"></product> -->
+  </div>
+
+  <div id="game"></div>
+</body>
+<script src="../todomvc/vue.js"></script>
+<script>
+  // Vue.component('table-cell', {
+  //   template: `
+  //     <td>
+  //       foo
+  //     </td>
+  //   `
+  // })
+
+  Vue.component('counter', {
+    template: `
+      <div>
+        <button @click="inc">+</button>
+        <span>{{count}}</span>
+        <button @click="dec">-</button>
+      </div>
+    `,
+    props: ['start'],
+    data() {
+      console.log('component created')
+      return {
+        count: this.start || 0
+      }
+    },
+    methods: {
+      inc() {
+        this.count++
+        this.$emit('inc',1,2,3)
+      },
+      dec() {
+        this.count--
+        this.$emit('dec',[4,5,6])
+      }
+    }
+  })
+
+  // Vue.component('product', {
+  //   template: `
+  //     <div @click="emitLikeEvent">
+  //       <h5>{{productName}}</h5>
+  //       <img :src="productSrc" alt="" />
+  //       <p @click="addClick">
+  //         本产品售价 {{productPrice}} 元
+  //       </p>
+  //       <table>
+  //         <tbody>
+  //           <tr>
+  //             <td is="table-cell"></td>
+  //             <table-cell></table-cell>
+  //             <table-cell></table-cell>
+  //             <table-cell></table-cell>
+  //             <table-cell></table-cell>
+  //             <table-cell></table-cell>
+  //           </tr>
+  //         </tbody>
+  //       </table>
+  //     </div>
+  //   `,
+  //   props: ['name', 'price', 'image-src'],
+  //   data: function() {
+  //     return {
+  //       productName: this.name,
+  //       productPrice: this.price,
+  //       productSrc: this.imageSrc
+  //     }
+  //   },
+  //   computed: {
+  //     listLength(){
+  //       return this.list.length
+  //     }
+  //   },
+  //   methods: {
+  //     addClick(){
+  //       this.click++
+  //     },
+  //     emitLikeEvent() {
+  //       this.$emit('eventtype')
+  //     }
+  //   }
+  // })
+
+  vm = new Vue({
+    el: '#app',
+    data: {
+      productList: [{
+        price: 123,
+        name: 'foo',
+        image: 'a.jpg',
+      },{
+        price: 123,
+        name: 'foo',
+        image: 'a.jpg',
+      },{
+        price: 123,
+        name: 'foo',
+        image: 'a.jpg',
+      },{
+        price: 123,
+        name: 'foo',
+        image: 'a.jpg',
+      },]
+    },
+    methods: {
+      productClicked: function(){
+        console.log('a user liked you product')
+      },
+      a(...args) {
+        console.log(args)
+        console.log('组件内部的数值增加了')
+      },
+      b(...args) {
+        console.log(args)
+        console.log('组件内部的数值减小了')
+      }
+    }
+  })
+</script>
+</html>

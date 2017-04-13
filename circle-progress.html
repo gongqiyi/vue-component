@@ -1,0 +1,70 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>环形进度条</title>
+</head>
+<body>
+  <div id="app">
+    <circle-progress :value="a"></circle-progress>
+    <circle-progress :value="b"></circle-progress>
+    <circle-progress :value="c"></circle-progress>
+    <circle-progress :value="99"></circle-progress>
+    <circle-progress :value="80"></circle-progress>
+  </div>
+</body>
+<script src="vue.js"></script>
+<script>
+  Vue.component('circle-progress', {
+    template: `
+      <div>
+        <svg width="250" height="250">
+          <path :d="d" stroke="red" fill="transparent" stroke-width="5" style="transform:translate(125px, 125px)" />
+        </svg>
+      </div>
+    `,
+    props: ['value', 'innderRadius', 'outerRadius'],
+    data() {
+      var angle = this.value / 100 * 2 * Math.PI - 0.5 * Math.PI
+      var isBigArc
+      if (this.value > 50) {
+        isBigArc = 1
+      } else {
+        isBigArc = 0
+      }
+      var x = Math.cos(angle) * 100
+      var y = Math.sin(angle) * 100
+      return {
+        currentValue: this.value || 50,
+        isBigArc,
+        d: `M 0 -100 A 100 100 0 ${isBigArc} 1 ${x} ${y}`
+      }
+    },
+    watch: {
+      value(newVal) {
+        var angle = newVal / 100 * 2 * Math.PI - 0.5 * Math.PI
+        var isBigArc
+        if (newVal > 50) {
+          isBigArc = 1
+        } else {
+          isBigArc = 0
+        }
+        var x = Math.cos(angle) * 100
+        var y = Math.sin(angle) * 100
+        this.d = `M 0 -100 A 100 100 0 ${isBigArc} 1 ${x} ${y}`
+      }
+    }
+  })
+
+  app = new Vue({
+    el: '#app',
+    data: {
+      a: 45,
+      b: 89,
+      c: 45,
+    }
+  })
+</script>
+</html>
