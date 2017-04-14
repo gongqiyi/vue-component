@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>todo</title>
+  <style>
+    li.done {
+      text-decoration: line-through;
+    }
+    li.selected {
+      font-size: 48px;
+    }
+  </style>
+</head>
+<body>
+  <div id="todo">
+    <input type="checkbox" v-model="isAllSelected" @click="toggleSelectAll">
+    <input type="text" v-model="todoInput" @keyup.enter="addTodo">
+    <ul>
+      <li :class="{done: todo.isDone}" v-for="(todo, index) in currentShowingTodos">
+        <span>{{index}}</span>
+        <input type="checkbox" v-model="todo.isDone">
+        <span v-show="!todo.isEditing" @dblclick="todo.isEditing=true" >{{todo.content}}</span>
+        <input v-show="todo.isEditing" @keyup.enter="todo.isEditing=false" @mouseover="$event.target.select()" @blur="todo.isEditing=false" type="text" v-model="todo.content">
+        <button @click=" delTodo(index) ">delete</button>
+      </li>
+    </ul>
+    <div>
+      <span>{{undoneCount}} {{undoneCount < 2?'item':'items'}} left</span>
+      <ul>
+        <li :class="{selected: showing == 'all'}" @click="   showing = 'all'  ">All</li>
+        <li :class="{selected: showing == 'active'}" @click="   showing = 'active' ">Active</li>
+        <li :class="{selected: showing == 'completed'}" @click="   showing = 'completed' ">Completed</li>
+      </ul>
+      <button v-show="haveCompleted" @click="clearAllCompleted">Clear All Completed</button>
+    </div>
+  </div>
+</body>
+<script src="vue.js"></script>
+<script>
+  var app = new Vue({
+    el: '#todo',
+    data: {
+      todoInput: '',
+      todos: JSON.parse(localStorage.todos || '[]'),
+      todoss: [{
+        isDone: false,
+        content: 'read Vue doc for 5 times',
+        isEditing: false,
+      }, {
+        isDone: false,
+        content: 'read book',
+        isEditing: false,
+      }, {
+        isDone: true, 
+        content: 'write code',
+        isEditing: false,
+      }],
+      showing: 'all'
+    },
+    watch: {
+      todoss: function(){
+        localStorage.todos = JSON.stringify(this.todos)
+      }
+    },
+    computed: {
+      isAllSelected: function(){
+        return !this.currentShowingTodos.every(it => !it.isDone)
+      },
+      undoneCount: function(){
+        return this.todos.filter(it => !it.isDone).length
+      },
+      currentShowingTodos: function(){
+        if (this.showing == 'all') {
+          return this.todos
+        }
+        if (this.showing == 'active') {
+          return this.todos.filter(it => it.isDone == false)
+        }
+        if (this.showing == 'completed') {
+          return this.todos.filter(it => it.isDone == true)
+        }
+      },
+      haveCompleted: function() {
+        return this.todos.some(it => it.isDone == true)
+      }
+    },
+    methods: {
+      addTodo: function(){
+        this.todos.push({
+          isDone: false,
+          content: this.todoInput,
+        })
+        this.todoInput = ''
+      },
+      toggleSelectAll: function(){
+        if (this.isAllSelected) {
+          this.todos.forEach(it => it.isDone = false)
+        } else {
+          this.todos.forEach(it => it.isDone = true)
+        }
+      },
+      clearAllCompleted() {
+        this.todos = this.todos.filter(it => it.isDone == false)
+      },
+      delTodo(index) {
+        console.log(index)
+        this.todos.splice(index, 1)
+      }
+    }
+  })
+
+  app.$watch('todos', function(){
+    localStorage.todos = JSON.stringify(this.todos)
+  }, {deep: true})
+</script>
+</html>
