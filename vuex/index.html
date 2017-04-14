@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <div id=app>
+    <input type="text" @keyup.enter="addTodo(inputTodo)" v-model="inputTodo">
+    <ul>
+      <li v-for="(todo,index) in todos">
+        <input type="checkbox" :value="todo.done" @click="toggleDone(index)">
+        <span>{{todo.content}}</span>
+        <button @click="delTodo(index,$event)">Delete</button>
+      </li>
+    </ul>
+    <div>{{unDoneCount}} items left</div>
+  </div>
+</body>
+<script src="vue.js"></script>
+<script src="vuex.js"></script>
+<script>
+  Vue.use(Vuex)
+
+  const DEL_TODO = 'delTodo'
+
+  var store = new Vuex.Store({
+    state: {
+      todos: [{
+        content:'eat',
+        done: false,
+      }]
+    },
+    getters: {
+      unDoneCount(state, getters) {
+        return state.todos.filter(it => !it.done).length
+      }
+    },
+    mutations: {
+      addTodo(state, todo) {
+        state.todos.push(todo)
+      },
+      [DEL_TODO](state, index) {
+        state.todos.splice(index, 1)
+      },
+      toggleDone(state, index) {
+        state.todos[index].done = !state.todos[index].done
+      }
+    },
+    actions: {
+      asyncAddTodo(context) {//可以认为context就是store
+        setTimeout(function(){
+          context.commit('addTodo', {content: 'async todo', done: false})
+        },1000)
+      }
+    }
+  })
+
+
+  var app = new Vue({
+    el: '#app',
+    store: store,
+    data: {
+      inputTodo: ''
+    },
+    methods: {
+      delTodo(index, event) {
+        this.$store.commit(DEL_TODO, index)
+      },
+      addTodo(content) {
+        this.$store.commit('addTodo', {
+          content,
+          done: false
+        })
+        this.inputTodo = ''
+      },
+      toggleDone(index) {
+        this.$store.commit('toggleDone', index)
+      }
+    },
+    computed: {
+      todos(){
+        return this.$store.state.todos
+      },
+      unDoneCount(){
+        return this.$store.getters.unDoneCount
+      },
+      // ...Vuex.mapState(['todos']),
+      // ...Vuex.mapGetters(['unDoneCount']),
+    },
+  })
+</script>
+</html>
